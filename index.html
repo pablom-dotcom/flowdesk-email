@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowDesk Email Sequence AI — Write Your Whole Email Sequence in Minutes</title>
+<meta name="description" content="Turn 5 quick answers into a complete, send-ready email sequence — welcome series, follow-ups, nurture campaigns. Powered by AI. No copywriting experience needed.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0e;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: rgba(255,255,255,0.08);
+    --accent: #f5a623;
+    --accent2: #ff6b35;
+    --accent3: #7b6fff;
+    --text: #f0f0f5;
+    --muted: rgba(240,240,245,0.45);
+    --radius: 14px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:-apple-system,'Segoe UI',sans-serif; min-height:100vh; }
+  a { color:inherit; text-decoration:none; }
+
+  /* NAV */
+  nav { display:flex; align-items:center; justify-content:space-between; padding:18px 40px; border-bottom:1px solid var(--border); position:sticky; top:0; background:rgba(10,10,14,0.85); backdrop-filter:blur(12px); z-index:100; }
+  .nav-brand { font-size:15px; font-weight:700; letter-spacing:-.01em; }
+  .nav-brand span { color:var(--accent); }
+  .nav-links { display:flex; gap:28px; font-size:13px; color:var(--muted); }
+  .nav-links a:hover { color:var(--text); }
+  .nav-cta { background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#000; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; }
+
+  /* HERO */
+  .hero { text-align:center; padding:90px 20px 70px; max-width:700px; margin:0 auto; }
+  .hero-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.3); border-radius:100px; padding:5px 14px; font-size:12px; color:var(--accent); font-weight:600; letter-spacing:.05em; text-transform:uppercase; margin-bottom:28px; }
+  .hero-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .hero h1 { font-size:clamp(34px,5vw,56px); font-weight:900; line-height:1.1; letter-spacing:-.03em; margin-bottom:20px; }
+  .hero h1 em { font-style:normal; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .hero p { font-size:17px; color:var(--muted); line-height:1.7; max-width:520px; margin:0 auto 36px; }
+  .hero-cta { display:inline-flex; align-items:center; gap:10px; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#000; border:none; border-radius:12px; padding:15px 30px; font-size:15px; font-weight:800; cursor:pointer; letter-spacing:-.01em; }
+  .hero-sub { margin-top:14px; font-size:12px; color:var(--muted); }
+
+  /* SOCIAL PROOF */
+  .proof-bar { display:flex; justify-content:center; gap:40px; padding:28px 20px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .proof-item { text-align:center; }
+  .proof-num { font-size:22px; font-weight:800; color:var(--text); }
+  .proof-label { font-size:12px; color:var(--muted); margin-top:2px; }
+
+  /* HOW IT WORKS */
+  .section { padding:70px 20px; max-width:900px; margin:0 auto; }
+  .section-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+  .section h2 { font-size:32px; font-weight:800; letter-spacing:-.02em; margin-bottom:10px; }
+  .section .desc { color:var(--muted); font-size:15px; line-height:1.7; max-width:540px; margin-bottom:48px; }
+  .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; }
+  .step { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; }
+  .step-num { width:34px; height:34px; border-radius:50%; background:rgba(245,166,35,0.15); border:1px solid rgba(245,166,35,0.3); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:var(--accent); margin-bottom:16px; }
+  .step h3 { font-size:15px; font-weight:700; margin-bottom:6px; }
+  .step p { font-size:13px; color:var(--muted); line-height:1.6; }
+
+  /* TOOL */
+  .tool-wrap { padding:0 20px 80px; max-width:820px; margin:0 auto; }
+  .tool-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; overflow:hidden; }
+  .tool-header { padding:28px 32px 0; }
+  .tool-header h2 { font-size:20px; font-weight:800; margin-bottom:4px; }
+  .tool-header p { font-size:13px; color:var(--muted); }
+  .tool-body { padding:28px 32px 32px; display:flex; flex-direction:column; gap:18px; }
+  .field label { display:block; font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px; }
+  .field input, .field textarea, .field select {
+    width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+    color:var(--text); font-size:14px; padding:12px 14px; font-family:inherit; resize:vertical;
+    transition:border .15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { outline:none; border-color:rgba(245,166,35,0.5); }
+  .field textarea { min-height:72px; }
+  .field select option { background:var(--surface2); }
+  .generate-btn {
+    width:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#000;
+    border:none; border-radius:12px; padding:16px; font-size:15px; font-weight:800;
+    cursor:pointer; letter-spacing:-.01em; margin-top:4px;
+  }
+  .generate-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+  /* QUOTA */
+  .quota-bar { background:var(--surface2); border-radius:8px; padding:10px 14px; font-size:12px; color:var(--muted); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .quota-bar span { color:var(--accent); font-weight:700; }
+
+  /* RESULT */
+  #result-area { display:none; padding:0 32px 32px; }
+  .result-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+  .result-title { font-size:18px; font-weight:800; }
+  .result-actions { display:flex; gap:10px; }
+  .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); border-radius:9px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-pro { background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#000; border:none; border-radius:9px; padding:9px 16px; font-size:13px; font-weight:700; cursor:pointer; }
+  .btn-pro:disabled { opacity:.5; cursor:not-allowed; }
+
+  /* EMAIL CARDS */
+  .emails-list { display:flex; flex-direction:column; gap:16px; }
+  .email-card { background:var(--surface2); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .email-card-header { display:flex; align-items:center; gap:12px; padding:14px 18px; cursor:pointer; user-select:none; }
+  .email-day-badge { background:rgba(245,166,35,0.15); border:1px solid rgba(245,166,35,0.25); border-radius:100px; padding:3px 10px; font-size:11px; font-weight:700; color:var(--accent); white-space:nowrap; }
+  .email-subject { font-size:14px; font-weight:700; flex:1; }
+  .email-toggle { font-size:18px; color:var(--muted); transition:transform .2s; }
+  .email-card.open .email-toggle { transform:rotate(180deg); }
+  .email-card-body { display:none; padding:0 18px 18px; }
+  .email-card.open .email-card-body { display:block; }
+  .email-preview-text { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border); }
+  .email-body-text { font-size:13.5px; color:var(--text); line-height:1.75; white-space:pre-wrap; }
+
+  /* PRO GATE */
+  .pro-gate { background:linear-gradient(135deg,rgba(245,166,35,0.08),rgba(255,107,53,0.05)); border:1px solid rgba(245,166,35,0.2); border-radius:14px; padding:28px; text-align:center; margin-top:20px; }
+  .pro-gate h3 { font-size:18px; font-weight:800; margin-bottom:8px; }
+  .pro-gate p { font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.6; }
+  .pro-gate-features { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:22px; }
+  .pro-gate-features span { background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.2); border-radius:100px; padding:4px 12px; font-size:12px; color:var(--accent); }
+  .pro-upgrade-btn { background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#000; border:none; border-radius:10px; padding:13px 28px; font-size:14px; font-weight:800; cursor:pointer; }
+
+  /* PRICING */
+  .pricing-wrap { padding:0 20px 80px; max-width:700px; margin:0 auto; }
+  .pricing-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:560px){ .pricing-grid { grid-template-columns:1fr; } }
+  .pricing-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; }
+  .pricing-card.featured { border-color:rgba(245,166,35,0.4); background:linear-gradient(135deg,rgba(245,166,35,0.06),rgba(255,107,53,0.03)); }
+  .plan-name { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:12px; }
+  .plan-price { font-size:40px; font-weight:900; letter-spacing:-.03em; }
+  .plan-price span { font-size:15px; font-weight:400; color:var(--muted); }
+  .plan-desc { font-size:13px; color:var(--muted); margin:10px 0 20px; line-height:1.6; }
+  .plan-features { list-style:none; display:flex; flex-direction:column; gap:9px; margin-bottom:24px; }
+  .plan-features li { font-size:13px; color:var(--muted); display:flex; gap:8px; align-items:flex-start; }
+  .plan-features li::before { content:'✓'; color:var(--accent); font-weight:800; flex-shrink:0; margin-top:1px; }
+  .plan-btn-free { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:9px; padding:12px; font-size:14px; font-weight:700; cursor:pointer; }
+  .plan-btn-pro { width:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#000; border:none; border-radius:9px; padding:12px; font-size:14px; font-weight:800; cursor:pointer; }
+
+  /* FAQ */
+  .faq-wrap { padding:0 20px 80px; max-width:700px; margin:0 auto; }
+  .faq-item { border-bottom:1px solid var(--border); padding:18px 0; cursor:pointer; }
+  .faq-q { font-size:15px; font-weight:600; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .faq-q::after { content:'+'; font-size:20px; color:var(--muted); flex-shrink:0; }
+  .faq-item.open .faq-q::after { content:'−'; }
+  .faq-a { display:none; font-size:13.5px; color:var(--muted); line-height:1.7; padding-top:12px; }
+  .faq-item.open .faq-a { display:block; }
+
+  /* FOOTER */
+  footer { border-top:1px solid var(--border); padding:28px 40px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  footer p { font-size:12px; color:var(--muted); }
+  .footer-links { display:flex; gap:20px; font-size:12px; color:var(--muted); }
+  .footer-links a:hover { color:var(--text); }
+
+  /* LOADING */
+  .spinner { display:inline-block; width:18px; height:18px; border:2px solid rgba(0,0,0,0.3); border-top-color:#000; border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; margin-right:8px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* MODAL */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:200; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:36px; max-width:480px; width:100%; text-align:center; }
+  .modal h3 { font-size:22px; font-weight:800; margin-bottom:10px; }
+  .modal p { font-size:14px; color:var(--muted); margin-bottom:24px; line-height:1.6; }
+  .modal-features { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:24px; }
+  .modal-features span { background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.2); border-radius:100px; padding:4px 12px; font-size:12px; color:var(--accent); }
+  .modal-btn { width:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#000; border:none; border-radius:10px; padding:14px; font-size:15px; font-weight:800; cursor:pointer; margin-bottom:10px; }
+  .modal-close { background:none; border:none; color:var(--muted); font-size:13px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">FlowDesk <span>Email AI</span></div>
+  <div class="nav-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('tool-section').scrollIntoView({behavior:'smooth'})">Try free →</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">FlowDesk AI · Tool #4</div>
+  <h1>Write your whole<br><em>email sequence</em><br>in minutes</h1>
+  <p>Answer 5 quick questions. Get a complete, send-ready email sequence — welcome series, follow-ups, nurture flows — written by AI in your voice.</p>
+  <button class="hero-cta" onclick="document.getElementById('tool-section').scrollIntoView({behavior:'smooth'})">
+    Generate my sequence →
+  </button>
+  <p class="hero-sub">Free to try · No account needed · Pro from $17/mo</p>
+</section>
+
+<!-- PROOF BAR -->
+<div class="proof-bar">
+  <div class="proof-item"><div class="proof-num">3–7</div><div class="proof-label">Emails generated</div></div>
+  <div class="proof-item"><div class="proof-num">&lt;60s</div><div class="proof-label">Generation time</div></div>
+  <div class="proof-item"><div class="proof-num">5</div><div class="proof-label">Questions to answer</div></div>
+  <div class="proof-item"><div class="proof-num">$0</div><div class="proof-label">To try it now</div></div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how-it-works">
+  <div class="section-label">How it works</div>
+  <h2>Three steps to a complete sequence</h2>
+  <p class="desc">No copywriting experience. No templates to fill in. Just answer five plain-English questions and get a full sequence.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><h3>Describe your goal</h3><p>Tell us what the sequence is for — onboarding, follow-ups, a launch, re-engagement — and who's receiving it.</p></div>
+    <div class="step"><div class="step-num">2</div><h3>AI writes the sequence</h3><p>Claude Haiku generates a full sequence: subject lines, preview text, and complete email body for each message.</p></div>
+    <div class="step"><div class="step-num">3</div><h3>Download &amp; send</h3><p>Preview every email, then export as a formatted PDF to load into your email platform of choice.</p></div>
+  </div>
+</section>
+
+<!-- TOOL -->
+<div class="tool-wrap" id="tool-section">
+  <div class="tool-card">
+    <div class="tool-header">
+      <h2>✉️ Email Sequence Generator</h2>
+      <p>Answer 5 quick questions — your sequence is ready in under a minute.</p>
+    </div>
+    <div class="tool-body">
+      <div class="field">
+        <label>1. What is this sequence for?</label>
+        <textarea id="q1" placeholder="e.g. Onboard new clients after they sign a contract, follow up after sending a proposal, nurture cold leads for my design services..."></textarea>
+      </div>
+      <div class="field">
+        <label>2. Who will receive these emails?</label>
+        <input id="q2" type="text" placeholder="e.g. Small business owners who just hired me as a freelance designer">
+      </div>
+      <div class="field">
+        <label>3. What's your offer or service?</label>
+        <textarea id="q3" placeholder="e.g. Brand identity design packages — logo, color palette, brand guidelines. Starting at $1,500." style="min-height:60px"></textarea>
+      </div>
+      <div class="field">
+        <label>4. Tone &amp; style</label>
+        <select id="q4">
+          <option value="warm and friendly, like talking to a trusted colleague">Warm &amp; friendly</option>
+          <option value="professional and polished">Professional &amp; polished</option>
+          <option value="casual and conversational">Casual &amp; conversational</option>
+          <option value="authoritative and expert-led">Authoritative &amp; expert</option>
+          <option value="energetic and enthusiastic">Energetic &amp; enthusiastic</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>5. What action do you want readers to take?</label>
+        <input id="q5" type="text" placeholder="e.g. Book a kickoff call, reply to the email, visit my portfolio, fill in the onboarding form">
+      </div>
+
+      <div class="quota-bar" id="quota-display">
+        <span>Free plan: <span id="quota-count">1</span> preview remaining today</span>
+        <a href="#pricing" style="color:var(--accent);font-size:12px;font-weight:700;">Upgrade to Pro →</a>
+      </div>
+
+      <button class="generate-btn" id="gen-btn" onclick="handleGenerate()">✉️ Generate my email sequence</button>
+    </div>
+
+    <div id="result-area">
+      <div class="result-header">
+        <div class="result-title" id="seq-name">Your Email Sequence</div>
+        <div class="result-actions">
+          <button class="btn-outline" onclick="resetTool()">↺ New sequence</button>
+          <button class="btn-pro" id="pdf-btn" onclick="handleDownload()">⬇ Download PDF</button>
+        </div>
+      </div>
+      <div class="emails-list" id="emails-list"></div>
+      <div class="pro-gate" id="pro-gate" style="display:none">
+        <h3>Unlock unlimited sequences</h3>
+        <p>You've used your free preview for today. Upgrade to Pro for unlimited generations and PDF downloads.</p>
+        <div class="pro-gate-features">
+          <span>Unlimited sequences</span><span>PDF downloads</span><span>Priority AI speed</span><span>Cancel anytime</span>
+        </div>
+        <button class="pro-upgrade-btn" onclick="openModal()">Upgrade to Pro — $17/mo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="pricing-wrap" id="pricing">
+  <div class="section-label">Pricing</div>
+  <h2 style="font-size:32px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px;">Simple pricing</h2>
+  <p style="color:var(--muted);font-size:15px;margin-bottom:36px;">Start free. Upgrade when you're ready.</p>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0<span> / forever</span></div>
+      <p class="plan-desc">Try the tool with no commitment.</p>
+      <ul class="plan-features">
+        <li>1 sequence preview per day</li>
+        <li>All 3–7 email cards</li>
+        <li>Subject lines + preview text</li>
+        <li>No account required</li>
+      </ul>
+      <button class="plan-btn-free" onclick="document.getElementById('tool-section').scrollIntoView({behavior:'smooth'})">Try for free</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$17<span> / month</span></div>
+      <p class="plan-desc">Everything you need to build and send email sequences at scale.</p>
+      <ul class="plan-features">
+        <li>Unlimited sequence generations</li>
+        <li>Unlimited PDF downloads</li>
+        <li>Priority AI response speed</li>
+        <li>Polished, send-ready formatting</li>
+        <li>Cancel anytime</li>
+      </ul>
+      <button class="plan-btn-pro" onclick="openModal()">Get Pro — $17/mo</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-wrap" id="faq">
+  <div class="section-label">FAQ</div>
+  <h2 style="font-size:32px;font-weight:800;letter-spacing:-.02em;margin-bottom:32px;">Common questions</h2>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">What kinds of sequences can this generate?</div>
+    <div class="faq-a">Welcome sequences, client onboarding, post-proposal follow-ups, cold lead nurture, re-engagement, product launches, and more. Just describe your goal in question 1 and the AI figures out the best structure.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">How many emails does it generate?</div>
+    <div class="faq-a">Between 3 and 7 emails, depending on the sequence type. Welcome and onboarding sequences typically get 3–5 emails; nurture and sales sequences get 5–7, with logical send timing for each.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">Do I need to know copywriting?</div>
+    <div class="faq-a">Not at all. Just answer the five questions in plain language — describe what you do, who you're emailing, and what you want them to do. The AI handles the writing.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">Can I edit the emails before sending?</div>
+    <div class="faq-a">Yes — the PDF download gives you the full text of every email, which you can paste into your email platform (Mailchimp, ConvertKit, ActiveCampaign, etc.) and edit as needed before sending.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">Is this part of the FlowDesk AI tool family?</div>
+    <div class="faq-a">Yes — FlowDesk Email Sequence AI is Tool #4 in the FlowDesk AI suite, alongside the Business Plan AI and Proposal & Pitch AI tools. All tools are fully automated and require no account.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">What does Pro include exactly?</div>
+    <div class="faq-a">Pro gives you unlimited sequence generations per day, unlimited PDF downloads, and priority AI speed. It's billed monthly at $17 and you can cancel anytime — no contracts, no annual lock-in.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">How do I cancel my Pro subscription?</div>
+    <div class="faq-a">Cancel anytime directly from your LemonSqueezy customer portal — there's a link in every receipt email. No questions asked, no cancellation fees.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">Who built this?</div>
+    <div class="faq-a">FlowDesk Email Sequence AI is part of the FlowDesk AI tool family. Questions or feedback? Email flowdskai@gmail.com.</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>FlowDesk Email Sequence AI · part of the FlowDesk AI tool family · flowdskai@gmail.com</p>
+  <div class="footer-links">
+    <a href="https://flowdesk-business-plan-ai.vercel.app" target="_blank">Business Plan AI</a>
+    <a href="https://flowdesk-proposal-ai.vercel.app" target="_blank">Proposal AI</a>
+  </div>
+</footer>
+
+<!-- PRO MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Upgrade to Pro</h3>
+    <p>Unlimited email sequences, unlimited PDF downloads, priority AI speed. Cancel anytime.</p>
+    <div class="modal-features">
+      <span>Unlimited generations</span><span>PDF downloads</span><span>Priority speed</span><span>Cancel anytime</span>
+    </div>
+    <button class="modal-btn" onclick="goCheckout()">Subscribe — $17/month →</button>
+    <button class="modal-close" onclick="closeModal()">No thanks</button>
+  </div>
+</div>
+
+<script>
+  const QUOTA_KEY = 'fd_email_quota_v1';
+  const PRO_KEY   = 'fd_email_pro_v1';
+  const LEMONSQUEEZY_CHECKOUT_URL = 'https://flowdesk1.lemonsqueezy.com/checkout/buy/c92c45bc-4b75-4670-a4dd-02e4a3bf593e';
+
+  let generatedData = null;
+
+  function isPro() {
+    try { return !!localStorage.getItem(PRO_KEY); } catch(e){ return false; }
+  }
+
+  function getQuota() {
+    try {
+      const raw = localStorage.getItem(QUOTA_KEY);
+      if (!raw) return { date: '', used: 0 };
+      return JSON.parse(raw);
+    } catch(e) { return { date: '', used: 0 }; }
+  }
+
+  function setQuota(q) {
+    try { localStorage.setItem(QUOTA_KEY, JSON.stringify(q)); } catch(e){}
+  }
+
+  function canGenerate() {
+    if (isPro()) return true;
+    const today = new Date().toISOString().slice(0,10);
+    const q = getQuota();
+    return q.date !== today || q.used < 1;
+  }
+
+  function useQuota() {
+    const today = new Date().toISOString().slice(0,10);
+    const q = getQuota();
+    const used = q.date === today ? q.used + 1 : 1;
+    setQuota({ date: today, used });
+  }
+
+  function updateQuotaDisplay() {
+    const el = document.getElementById('quota-display');
+    const ct = document.getElementById('quota-count');
+    if (isPro()) {
+      el.innerHTML = '<span>✓ Pro plan — unlimited generations</span>';
+    } else {
+      const today = new Date().toISOString().slice(0,10);
+      const q = getQuota();
+      const remaining = q.date === today ? Math.max(0, 1 - q.used) : 1;
+      ct.textContent = remaining;
+    }
+  }
+
+  function getAnswers() {
+    return [
+      document.getElementById('q1').value.trim(),
+      document.getElementById('q2').value.trim(),
+      document.getElementById('q3').value.trim(),
+      document.getElementById('q4').value,
+      document.getElementById('q5').value.trim(),
+    ];
+  }
+
+  async function handleGenerate() {
+    const answers = getAnswers();
+    if (!answers[0]) { alert('Please describe the goal of your email sequence.'); return; }
+    if (!canGenerate()) { openModal(); return; }
+
+    const btn = document.getElementById('gen-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Writing your sequence…';
+
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.message || data.error || 'Generation failed');
+      useQuota();
+      generatedData = data;
+      renderResult(data);
+    } catch(err) {
+      alert('Something went wrong: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '✉️ Generate my email sequence';
+      updateQuotaDisplay();
+    }
+  }
+
+  function renderResult(data) {
+    document.getElementById('seq-name').textContent = data.sequence_name || 'Your Email Sequence';
+
+    const list = document.getElementById('emails-list');
+    list.innerHTML = '';
+    (data.emails || []).forEach((email, i) => {
+      const card = document.createElement('div');
+      card.className = 'email-card';
+      card.innerHTML = `
+        <div class="email-card-header" onclick="this.parentElement.classList.toggle('open')">
+          <div class="email-day-badge">${escHtml(email.send_day)}</div>
+          <div class="email-subject">${escHtml(email.subject)}</div>
+          <div class="email-toggle">▾</div>
+        </div>
+        <div class="email-card-body">
+          ${email.preview ? `<div class="email-preview-text">Preview text: ${escHtml(email.preview)}</div>` : ''}
+          <div class="email-body-text">${escHtml(email.body)}</div>
+        </div>`;
+      // auto-open first email
+      if (i === 0) card.classList.add('open');
+      list.appendChild(card);
+    });
+
+    const proGate = document.getElementById('pro-gate');
+    proGate.style.display = !isPro() ? 'block' : 'none';
+
+    const pdfBtn = document.getElementById('pdf-btn');
+    pdfBtn.disabled = !isPro();
+    if (!isPro()) pdfBtn.title = 'Pro plan required';
+
+    document.getElementById('result-area').style.display = 'block';
+    document.getElementById('result-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function resetTool() {
+    generatedData = null;
+    document.getElementById('result-area').style.display = 'none';
+    document.getElementById('tool-section').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function handleDownload() {
+    if (!isPro()) { openModal(); return; }
+    if (!generatedData) return;
+    generatePDF(generatedData);
+  }
+
+  function generatePDF(data) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const pw = 210, ml = 18, mr = 18, tw = pw - ml - mr;
+    let y = 20;
+
+    const addText = (txt, sz, bold, color, maxW) => {
+      doc.setFontSize(sz);
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      doc.setTextColor(...(color || [30,30,40]));
+      const lines = doc.splitTextToSize(txt, maxW || tw);
+      lines.forEach(l => {
+        if (y > 275) { doc.addPage(); y = 20; }
+        doc.text(l, ml, y);
+        y += sz * 0.45;
+      });
+      return y;
+    };
+
+    // Header
+    doc.setFillColor(245,166,35);
+    doc.rect(0, 0, 210, 12, 'F');
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(0,0,0);
+    doc.text('FLOWDESK EMAIL SEQUENCE AI', ml, 8);
+    doc.text('flowdesk-email-ai.vercel.app', pw - mr, 8, { align: 'right' });
+    y = 24;
+
+    addText(data.sequence_name || 'Email Sequence', 20, true, [15,15,25]);
+    y += 3;
+    addText(`Generated by FlowDesk Email Sequence AI · ${new Date().toLocaleDateString()}`, 9, false, [130,130,150]);
+    y += 8;
+
+    (data.emails || []).forEach((email, i) => {
+      if (y > 240) { doc.addPage(); y = 20; }
+      // email header bar
+      doc.setFillColor(245,166,35,0.9);
+      doc.setFillColor(40,38,60);
+      doc.rect(ml, y, tw, 9, 'F');
+      doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(245,166,35);
+      doc.text(`Email ${email.number} — ${email.send_day}`, ml + 3, y + 6);
+      y += 13;
+
+      addText(`Subject: ${email.subject}`, 10, true, [15,15,25]);
+      y += 1;
+      if (email.preview) { addText(`Preview: ${email.preview}`, 9, false, [100,100,120]); y += 2; }
+
+      // body
+      doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(40,40,60);
+      const paras = (email.body || '').split('\n\n');
+      paras.forEach(p => {
+        const lines = doc.splitTextToSize(p.trim(), tw);
+        lines.forEach(l => {
+          if (y > 275) { doc.addPage(); y = 20; }
+          doc.text(l, ml, y);
+          y += 5;
+        });
+        y += 3;
+      });
+      y += 6;
+    });
+
+    // footer
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(160,160,180);
+    doc.text('Generated by FlowDesk Email Sequence AI · flowdskai@gmail.com', ml, 290);
+
+    doc.save('email-sequence-flowdesk-ai.pdf');
+  }
+
+  function escHtml(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openModal() { document.getElementById('modal').classList.add('open'); }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+  function goCheckout() { window.open(LEMONSQUEEZY_CHECKOUT_URL, '_blank'); closeModal(); }
+
+  updateQuotaDisplay();
+</script>
+</body>
+</html>
